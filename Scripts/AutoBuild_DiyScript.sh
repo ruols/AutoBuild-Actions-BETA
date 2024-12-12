@@ -102,17 +102,18 @@ EOF
 		AddPackage other pymumu luci-app-smartdns lede
   		AddPackage other UnblockNeteaseMusic luci-app-unblockneteasemusic master
 
+		#sed -i "s?openwrt-23.05?master?g" ${FEEDS_CONF}
+		git reset --hard 1627fd2c745e496134834a8fb8145ba0aa458ae9
+		
 		rm -r ${FEEDS_LUCI}/luci-theme-argon*
 		AddPackage other vernesong OpenClash dev
 		AddPackage other jerrykuku luci-app-argon-config master
-		AddPackage other fw876 helloworld main
 		AddPackage other sbwml luci-app-mosdns v5-lua
 		AddPackage themes jerrykuku luci-theme-argon 18.06
 		AddPackage themes thinktip luci-theme-neobird main
 		AddPackage msd_lite ximiTech luci-app-msd_lite main
 		AddPackage msd_lite ximiTech msd_lite main
 		AddPackage iptvhelper riverscn openwrt-iptvhelper master
-		rm -r ${WORK}/package/other/helloworld/mosdns
 		rm -r ${FEEDS_PKG}/mosdns
 		rm -r ${FEEDS_LUCI}/luci-app-mosdns
 		rm -r ${FEEDS_PKG}/curl
@@ -144,12 +145,23 @@ EOF
 			AddPackage passwall xiaorouji openwrt-passwall-packages main
 			AddPackage passwall xiaorouji openwrt-passwall main
 			# AddPackage passwall xiaorouji openwrt-passwall2 main
-			rm -r ${WORK}/package/other/helloworld/xray-core
-			rm -r ${WORK}/package/other/helloworld/xray-plugin
+			rm -r ${FEEDS_PKG}/xray-core
+			rm -r ${FEEDS_PKG}/sing-box
 			# rm -rf packages/lean/autocore
 			# AddPackage lean Hyy2001X autocore-modify master
 			Copy ${CustomFiles}/speedtest ${BASE_FILES}/usr/bin
 			chmod +x ${BASE_FILES}/usr/bin/speedtest
+			
+			mosdns_version="5.3.3"
+			wget --quiet --no-check-certificate -P /tmp \
+				https://github.com/IrineSistiana/mosdns/releases/download/v${mosdns_version}/mosdns-linux-amd64.zip
+			unzip /tmp/mosdns-linux-amd64.zip -d /tmp
+			Copy /tmp/mosdns ${BASE_FILES}/usr/bin
+			chmod +x ${BASE_FILES}/usr/bin
+			sed -i "s?+mosdns ??g" ${WORK}/package/other/luci-app-mosdns/luci-app-mosdns/Makefile
+			sed -i "s?+v2ray-geoip ??g" ${WORK}/package/other/luci-app-mosdns/luci-app-mosdns/Makefile
+			sed -i "s?+v2ray-geosite ??g" ${WORK}/package/other/luci-app-mosdns/luci-app-mosdns/Makefile
+			rm -r ${WORK}/package/other/luci-app-mosdns/mosdns
 		;;
 		xiaomi_redmi-router-ax6s)
 			AddPackage passwall-depends xiaorouji openwrt-passwall-packages main
@@ -162,16 +174,25 @@ EOF
 		x86_64)
 			sed -i -- 's:/bin/ash:'/bin/bash':g' ${BASE_FILES}/etc/passwd
 			case "${CONFIG_FILE}" in
-			x86_64-NextV21)
+			x86_64-Next)
 				# sed -i "s?/bin/login?/usr/libexec/login.sh?g" ${FEEDS_PKG}/ttyd/files/ttyd.config
-				# AddPackage passwall xiaorouji openwrt-passwall2 main
 				AddPackage passwall xiaorouji openwrt-passwall main
+				# AddPackage passwall xiaorouji openwrt-passwall2 main
 				rm -r ${FEEDS_LUCI}/luci-app-passwall
-				rm -r ${FEEDS_PKG}/xray-core
-				rm -r ${FEEDS_PKG}/xray-plugin
 				AddPackage other sbwml luci-app-mosdns v5
+				mosdns_version="5.3.3"
+				wget --quiet --no-check-certificate -P /tmp \
+					https://github.com/IrineSistiana/mosdns/releases/download/v${mosdns_version}/mosdns-linux-amd64.zip
+				unzip /tmp/mosdns-linux-amd64.zip -d /tmp
+				Copy /tmp/mosdns ${BASE_FILES}/usr/bin
+				chmod +x ${BASE_FILES}/usr/bin
+				sed -i "s?+mosdns ??g" ${WORK}/package/other/luci-app-mosdns/luci-app-mosdns/Makefile
+				sed -i "s?+v2ray-geoip ??g" ${WORK}/package/other/luci-app-mosdns/luci-app-mosdns/Makefile
+				sed -i "s?+v2ray-geosite ??g" ${WORK}/package/other/luci-app-mosdns/luci-app-mosdns/Makefile
 				rm -r ${WORK}/package/other/luci-app-mosdns/mosdns
-				patch < ${CustomFiles}/mt7981/0001-Add-iptables-socket.patch -p1 -d ${WORK}
+				
+				Copy ${CustomFiles}/socat.Makefile ${FEEDS_PKG}/socat Makefile
+				rm -r ${FEEDS_PKG}/socat/files
 				Copy ${CustomFiles}/speedtest ${BASE_FILES}/usr/bin
 				chmod +x ${BASE_FILES}/usr/bin/speedtest
 			;;
@@ -190,22 +211,16 @@ EOF
 		case "${TARGET_PROFILE}" in
 		cmcc_rax3000m | jcg_q30)
 			AddPackage passwall xiaorouji openwrt-passwall main
-			AddPackage other sbwml luci-app-mosdns v5
-   			rm -r ${WORK}/package/other/luci-app-mosdns/mosdns
 			rm -r ${FEEDS_LUCI}/luci-app-passwall
 			patch < ${CustomFiles}/mt7981/0001-Add-iptables-socket.patch -p1 -d ${WORK}
 			rm -r ${WORK}/package/network/services/dnsmasq
 			Copy ${CustomFiles}/dnsmasq ${WORK}/package/network/services
 
-			mosdns_version="5.3.3"
-			wget --quiet --no-check-certificate -P /tmp \
-				https://github.com/IrineSistiana/mosdns/releases/download/v${mosdns_version}/mosdns-linux-arm64.zip
-			unzip /tmp/mosdns-linux-arm64.zip -d /tmp
-			Copy /tmp/mosdns ${BASE_FILES}/usr/bin
-			chmod +x ${BASE_FILES}/usr/bin
-			sed -i "s?+mosdns ??g" ${WORK}/package/other/luci-app-mosdns/luci-app-mosdns/Makefile
-			sed -i "s?+v2ray-geoip ??g" ${WORK}/package/other/luci-app-mosdns/luci-app-mosdns/Makefile
-			sed -i "s?+v2ray-geosite ??g" ${WORK}/package/other/luci-app-mosdns/luci-app-mosdns/Makefile
+			find ${WORK}/package/ | grep Makefile | grep v2ray-geodata | xargs rm -f
+			find ${WORK}/package/ | grep Makefile | grep mosdns | xargs rm -f
+			
+			AddPackage other sbwml luci-app-mosdns v5
+			AddPackage other sbwml v2ray-geodata master
 		;;
 		esac
 	;;
@@ -215,31 +230,22 @@ EOF
 		Copy ${CustomFiles}/Depends/cpuset ${BASE_FILES}/bin
 		ReleaseDL https://api.github.com/repos/nxtrace/NTrace-core/releases/latest nexttrace_linux_amd64 ${BASE_FILES}/bin nexttrace
 
-		singbox_version="1.10.0-alpha.18"
-		hysteria_version="2.5.1"
-		wstunnel_version="10.1.1"
-		cloudflared_version="2024.9.1"
+		hysteria_version="2.6.0"
+		wstunnel_version="10.1.6"
 		taierspeed_version="1.7.2"
 		
-		wget --quiet --no-check-certificate -P /tmp \
-			https://github.com/SagerNet/sing-box/releases/download/v${singbox_version}/sing-box-${singbox_version}-linux-amd64.tar.gz
 		wget --quiet --no-check-certificate -P /tmp \
 			https://github.com/apernet/hysteria/releases/download/app%2Fv${hysteria_version}/hysteria-linux-amd64
 		wget --quiet --no-check-certificate -P /tmp \
 			https://github.com/erebe/wstunnel/releases/download/v${wstunnel_version}/wstunnel_${wstunnel_version}_linux_amd64.tar.gz
 		wget --quiet --no-check-certificate -P /tmp \
-			https://github.com/cloudflare/cloudflared/releases/download/${cloudflared_version}/cloudflared-linux-amd64
-		wget --quiet --no-check-certificate -P /tmp \
 			https://github.com/ztelliot/taierspeed-cli/releases/download/v${taierspeed_version}/taierspeed-cli_${taierspeed_version}_linux_amd64
 
-		tar -xvzf /tmp/sing-box-${singbox_version}-linux-amd64.tar.gz -C /tmp
 		tar -xvzf /tmp/wstunnel_${wstunnel_version}_linux_amd64.tar.gz -C /tmp
-		Copy /tmp/sing-box-${singbox_version}-linux-amd64/sing-box ${BASE_FILES}/usr/bin
 		Copy /tmp/wstunnel ${BASE_FILES}/usr/bin
 		Copy /tmp/hysteria-linux-amd64 ${BASE_FILES}/usr/bin hysteria
-		Copy /tmp/cloudflared-linux-amd64 ${BASE_FILES}/usr/bin cloudflared
 		Copy /tmp/taierspeed-cli_${taierspeed_version}_linux_amd64 ${BASE_FILES}/usr/bin taierspeed
-		chmod +x ${BASE_FILES}/usr/bin/sing-box ${BASE_FILES}/usr/bin/hysteria ${BASE_FILES}/usr/bin/wstunnel ${BASE_FILES}/usr/bin/cloudflared ${BASE_FILES}/usr/bin/taierspeed
+		chmod +x ${BASE_FILES}/usr/bin/hysteria ${BASE_FILES}/usr/bin/wstunnel ${BASE_FILES}/usr/bin/taierspeed
 
 		# ReleaseDL https://api.github.com/repos/Loyalsoldier/v2ray-rules-dat/releases/latest geosite.dat ${BASE_FILES}/usr/v2ray
 		# ReleaseDL https://api.github.com/repos/Loyalsoldier/v2ray-rules-dat/releases/latest geoip.dat ${BASE_FILES}/usr/v2ray
