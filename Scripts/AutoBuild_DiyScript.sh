@@ -137,32 +137,6 @@ EOF
 		d-team_newifi-d2)
 			Copy ${CustomFiles}/${TARGET_PROFILE}_system ${BASE_FILES}/etc/config system
 		;;
-		x86_64)
-			# sed -i "s?6.1?6.6?g" ${WORK}/target/linux/x86/Makefile
-			ClashDL amd64 dev
-			ClashDL amd64 tun
-			ClashDL amd64 meta
-			AddPackage passwall xiaorouji openwrt-passwall-packages main
-			AddPackage passwall xiaorouji openwrt-passwall main
-			# AddPackage passwall xiaorouji openwrt-passwall2 main
-			rm -r ${FEEDS_PKG}/xray-core
-			rm -r ${FEEDS_PKG}/sing-box
-			# rm -rf packages/lean/autocore
-			# AddPackage lean Hyy2001X autocore-modify master
-			Copy ${CustomFiles}/speedtest ${BASE_FILES}/usr/bin
-			chmod +x ${BASE_FILES}/usr/bin/speedtest
-			
-			mosdns_version="5.3.3"
-			wget --quiet --no-check-certificate -P /tmp \
-				https://github.com/IrineSistiana/mosdns/releases/download/v${mosdns_version}/mosdns-linux-amd64.zip
-			unzip /tmp/mosdns-linux-amd64.zip -d /tmp
-			Copy /tmp/mosdns ${BASE_FILES}/usr/bin
-			chmod +x ${BASE_FILES}/usr/bin
-			sed -i "s?+mosdns ??g" ${WORK}/package/other/luci-app-mosdns/luci-app-mosdns/Makefile
-			sed -i "s?+v2ray-geoip ??g" ${WORK}/package/other/luci-app-mosdns/luci-app-mosdns/Makefile
-			sed -i "s?+v2ray-geosite ??g" ${WORK}/package/other/luci-app-mosdns/luci-app-mosdns/Makefile
-			rm -r ${WORK}/package/other/luci-app-mosdns/mosdns
-		;;
 		xiaomi_redmi-router-ax6s)
 			AddPackage passwall-depends xiaorouji openwrt-passwall-packages main
 			AddPackage passwall-luci xiaorouji openwrt-passwall main
@@ -174,11 +148,13 @@ EOF
 		x86_64)
 			sed -i -- 's:/bin/ash:'/bin/bash':g' ${BASE_FILES}/etc/passwd
 			case "${CONFIG_FILE}" in
-			x86_64-Next)
+			x86_64)
 				# sed -i "s?/bin/login?/usr/libexec/login.sh?g" ${FEEDS_PKG}/ttyd/files/ttyd.config
 				AddPackage passwall xiaorouji openwrt-passwall main
 				# AddPackage passwall xiaorouji openwrt-passwall2 main
 				rm -r ${FEEDS_LUCI}/luci-app-passwall
+				AddPackage other WROIATE luci-app-socat main
+    			#rm -r ${FEEDS_LUCI}/luci-app-socat
 				AddPackage other sbwml luci-app-mosdns v5
 				mosdns_version="5.3.3"
 				wget --quiet --no-check-certificate -P /tmp \
@@ -195,6 +171,8 @@ EOF
 				rm -r ${FEEDS_PKG}/socat/files
 				Copy ${CustomFiles}/speedtest ${BASE_FILES}/usr/bin
 				chmod +x ${BASE_FILES}/usr/bin/speedtest
+				
+				sed -i '/PKG_FIXUP/d' ${WORK}/feeds/packages/libs/libffi/Makefile
 			;;
 			esac
 		;;
@@ -230,22 +208,16 @@ EOF
 		Copy ${CustomFiles}/Depends/cpuset ${BASE_FILES}/bin
 		ReleaseDL https://api.github.com/repos/nxtrace/NTrace-core/releases/latest nexttrace_linux_amd64 ${BASE_FILES}/bin nexttrace
 
-		hysteria_version="2.6.0"
-		wstunnel_version="10.1.6"
-		taierspeed_version="1.7.2"
-		
+		hysteria_version="2.6.1"
+		wstunnel_version="9.2.3"
 		wget --quiet --no-check-certificate -P /tmp \
 			https://github.com/apernet/hysteria/releases/download/app%2Fv${hysteria_version}/hysteria-linux-amd64
 		wget --quiet --no-check-certificate -P /tmp \
 			https://github.com/erebe/wstunnel/releases/download/v${wstunnel_version}/wstunnel_${wstunnel_version}_linux_amd64.tar.gz
-		wget --quiet --no-check-certificate -P /tmp \
-			https://github.com/ztelliot/taierspeed-cli/releases/download/v${taierspeed_version}/taierspeed-cli_${taierspeed_version}_linux_amd64
-
 		tar -xvzf /tmp/wstunnel_${wstunnel_version}_linux_amd64.tar.gz -C /tmp
 		Copy /tmp/wstunnel ${BASE_FILES}/usr/bin
 		Copy /tmp/hysteria-linux-amd64 ${BASE_FILES}/usr/bin hysteria
-		Copy /tmp/taierspeed-cli_${taierspeed_version}_linux_amd64 ${BASE_FILES}/usr/bin taierspeed
-		chmod +x ${BASE_FILES}/usr/bin/hysteria ${BASE_FILES}/usr/bin/wstunnel ${BASE_FILES}/usr/bin/taierspeed
+		chmod +x ${BASE_FILES}/usr/bin/hysteria ${BASE_FILES}/usr/bin/wstunnel
 
 		# ReleaseDL https://api.github.com/repos/Loyalsoldier/v2ray-rules-dat/releases/latest geosite.dat ${BASE_FILES}/usr/v2ray
 		# ReleaseDL https://api.github.com/repos/Loyalsoldier/v2ray-rules-dat/releases/latest geoip.dat ${BASE_FILES}/usr/v2ray
