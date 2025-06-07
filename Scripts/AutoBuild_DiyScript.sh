@@ -151,8 +151,13 @@ EOF
 			x86_64)
 				# sed -i "s?/bin/login?/usr/libexec/login.sh?g" ${FEEDS_PKG}/ttyd/files/ttyd.config
 				#AddPackage passwall xiaorouji openwrt-passwall main
-				AddPackage passwall xiaorouji openwrt-passwall2 main
 				rm -r ${FEEDS_LUCI}/luci-app-passwall
+
+				# 根据https://github.com/xiaorouji/openwrt-passwall2/issues/722#issuecomment-2560962548
+				# 添加此命令
+				rm -rf ${FEEDS_PKG}/net/{chinadns*,hysteria,geoview,trojan*,xray*,v2ray*,sing*}
+				AddPackage passwall xiaorouji openwrt-passwall2 main
+
 				AddPackage other WROIATE luci-app-socat main
     			#rm -r ${FEEDS_LUCI}/luci-app-socat
 				AddPackage other sbwml luci-app-mosdns v5
