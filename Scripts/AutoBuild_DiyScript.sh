@@ -157,6 +157,7 @@ EOF
 				# 添加此命令
 				rm -rf ${FEEDS_PKG}/net/{chinadns*,hysteria,geoview,trojan*,xray*,v2ray*,sing*}
 				AddPackage passwall xiaorouji openwrt-passwall2 main
+    				AddPackage passwall-depends xiaorouji openwrt-passwall-packages main
 
 				AddPackage other WROIATE luci-app-socat main
     			#rm -r ${FEEDS_LUCI}/luci-app-socat
