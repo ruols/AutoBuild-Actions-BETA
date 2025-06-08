@@ -158,6 +158,8 @@ EOF
 				rm -rf ${FEEDS_PKG}/net/{chinadns*,hysteria,geoview,trojan*,xray*,v2ray*,sing*}
 				AddPackage passwall xiaorouji openwrt-passwall2 main
     				AddPackage passwall-depends xiaorouji openwrt-passwall-packages main
+				# 解决rust报错https://github.com/immortalwrt/packages/issues/1607#issuecomment-2926678927
+    				sed -i 's/--set=llvm\.download-ci-llvm=true/--set=llvm.download-ci-llvm=false/' ${FEEDS_PKG}/lang/rust/Makefile
 
 				AddPackage other WROIATE luci-app-socat main
     			#rm -r ${FEEDS_LUCI}/luci-app-socat
