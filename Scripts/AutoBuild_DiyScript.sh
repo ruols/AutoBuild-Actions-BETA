@@ -157,6 +157,7 @@ EOF
 				# 添加此命令
 				rm -rf ${WORK}/feeds/packages/net/{chinadns*,hysteria,geoview,trojan*,xray*,v2ray*,sing*}
     				rm -rf ${FEEDS_PKG}/net/{chinadns*,hysteria,geoview,trojan*,xray*,v2ray*,sing*}
+				rm -rf ${WORK}/feeds/luci/applications/luci-app-passwall/
 				AddPackage passwall xiaorouji openwrt-passwall2 main
     				AddPackage passwall-depends xiaorouji openwrt-passwall-packages main
 				# 解决rust报错https://github.com/immortalwrt/packages/issues/1607#issuecomment-2926678927
