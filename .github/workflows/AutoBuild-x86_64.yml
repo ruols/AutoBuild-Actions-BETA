@@ -37,6 +37,7 @@ on:
         type: choice
         options:
           - 'immortalwrt/immortalwrt:master'
+          - 'immortalwrt/immortalwrt:openwrt-24.10'
           - 'coolsnowwolf/lede:master'
       Tempoary_FLAG:
         description: '固件标签'
