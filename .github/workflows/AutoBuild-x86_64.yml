@@ -31,6 +31,13 @@ on:
         options:
           - 'x86_64'
           - 'x86_64-AP'
+      Code_SOURCE: 
+        description: '源码仓'
+        default: 'immortalwrt/immortalwrt:master'
+        type: choice
+        options:
+          - 'immortalwrt/immortalwrt:master'
+          - 'coolsnowwolf/lede:master'
       Tempoary_FLAG:
         description: '固件标签'
         default: 'AUTO'
@@ -42,13 +49,6 @@ on:
       Tempoary_IP:
         description: '固件 IP 地址 [可选]'
         default: ''
-      DEFAULT_SOURCE: 
-        description: '源码仓'
-        default: 'immortalwrt/immortalwrt:master'
-        type: choice
-        options:
-          - 'immortalwrt/immortalwrt:master'
-          - 'coolsnowwolf/lede:master'
       UPLOAD_RELEASES:
         description: '上传固件到 Releases'
         default: 'true'
@@ -69,7 +69,7 @@ env:
 # 编译时调用的 [.config] 文件名称
   CONFIG_FILE: x86_64-Next
 # 源码仓库:分支
-  DEFAULT_SOURCE: coolsnowwolf/lede:master
+  DEFAULT_SOURCE: ${{ github.event.inputs.Code_SOURCE }}
 # 删除无用文件以增加编译空间
   DELETE_USELESS_FILES: true
 # 删除早期的 workflow 任务
