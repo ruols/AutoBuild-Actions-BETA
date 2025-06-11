@@ -98,9 +98,10 @@ EOF
 		# sed -i 's/luci-theme-bootstrap/luci-theme-argon/g' feeds/luci/collections/luci/Makefile
 		# sed -i '/uci commit luci/i\uci set luci.main.mediaurlbase="/luci-static/argon-mod"' $(PKG_Finder d package default-settings)/files/zzz-default-settings
 
-		AddPackage other xiaorouji openwrt-passwall2 main
-		AddPackage other pymumu luci-app-smartdns lede
   		AddPackage other UnblockNeteaseMusic luci-app-unblockneteasemusic master
+		AddPackage passwall xiaorouji openwrt-passwall main
+		AddPackage passwall2 xiaorouji openwrt-passwall2 main
+    	AddPackage passwall-depends xiaorouji openwrt-passwall-packages main
 
 		#sed -i "s?openwrt-23.05?master?g" ${FEEDS_CONF}
 		git reset --hard 1627fd2c745e496134834a8fb8145ba0aa458ae9
@@ -150,16 +151,14 @@ EOF
 			case "${CONFIG_FILE}" in
 			x86_64)
 				# sed -i "s?/bin/login?/usr/libexec/login.sh?g" ${FEEDS_PKG}/ttyd/files/ttyd.config
-				#AddPackage passwall xiaorouji openwrt-passwall main
-				rm -r ${FEEDS_LUCI}/luci-app-passwall
 
 				# 根据https://github.com/xiaorouji/openwrt-passwall2/issues/722#issuecomment-2560962548
-				# 添加此命令
+				# 添加此命令解决passwall冲突
 				rm -rf ${WORK}/feeds/packages/net/{chinadns*,hysteria,geoview,trojan*,xray*,v2ray*,sing*}
     			rm -rf ${FEEDS_PKG}/net/{chinadns*,hysteria,geoview,trojan*,xray*,v2ray*,sing*}
 				rm -rf ${WORK}/feeds/luci/applications/luci-app-passwall/
-				AddPackage passwall xiaorouji openwrt-passwall2 main
-    			AddPackage passwall-depends xiaorouji openwrt-passwall-packages main
+				rm -r ${FEEDS_LUCI}/luci-app-passwall
+				
 				# 解决rust报错https://github.com/immortalwrt/packages/issues/1607#issuecomment-2926678927
     			sed -i 's/--set=llvm\.download-ci-llvm=true/--set=llvm.download-ci-llvm=false/' ${WORK}/feeds/packages/lang/rust/Makefile
 
