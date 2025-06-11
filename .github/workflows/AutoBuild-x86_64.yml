@@ -26,7 +26,7 @@ on:
     inputs:
       Tempoary_CONFIG:
         description: '配置文件'
-        default: 'x86_64-Next'
+        default: 'x86_64'
         type: choice
         options:
           - 'x86_64'
