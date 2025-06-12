@@ -68,11 +68,11 @@ on:
 ### 环境变量设置
 env:
 # 编译时调用的 [.config] 文件名称
-  CONFIG_FILE: x86_64-Next
+  CONFIG_FILE: x86_64
 # 源码仓库:分支
   DEFAULT_SOURCE: ${{ github.event.inputs.Code_SOURCE }}
 # 删除无用文件以增加编译空间
-  DELETE_USELESS_FILES: true
+  DELETE_USELESS_FILES: false
 # 删除早期的 workflow 任务
   DELETE_OLD_WORKFLOW: false
 # Cache 加速编译
