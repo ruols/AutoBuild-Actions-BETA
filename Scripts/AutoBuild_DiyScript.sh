@@ -73,10 +73,11 @@ Firmware_Diy() {
 	# ReleaseDL <release_url> <file> <target_path>
 	# Copy <cp_from> <cp_to > <rename>
 	# merge_package <git_branch> <git_repo_url> <package_path> <target_path>..
+ 
 	AddPackage other UnblockNeteaseMusic luci-app-unblockneteasemusic master
 	AddPackage passwall xiaorouji openwrt-passwall main
 	AddPackage passwall2 xiaorouji openwrt-passwall2 main
-    AddPackage passwall-depends xiaorouji openwrt-passwall-packages main
+	AddPackage passwall-depends xiaorouji openwrt-passwall-packages main
 	
 	case "${OP_AUTHOR}/${OP_REPO}:${OP_BRANCH}" in
 	coolsnowwolf/lede:master)
@@ -148,6 +149,7 @@ EOF
 			case "${CONFIG_FILE}" in
 			x86_64)
 				# sed -i "s?/bin/login?/usr/libexec/login.sh?g" ${FEEDS_PKG}/ttyd/files/ttyd.config
+    
 				# 根据https://github.com/xiaorouji/openwrt-passwall2/issues/722#issuecomment-2560962548
 				# 添加此命令解决passwall冲突
 				rm -rf ${WORK}/feeds/packages/net/{chinadns*,hysteria,geoview,trojan*,xray*,v2ray*,sing*}
