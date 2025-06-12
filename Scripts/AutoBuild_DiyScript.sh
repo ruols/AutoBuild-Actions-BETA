@@ -36,7 +36,6 @@ Firmware_Diy_Core() {
 	Fw_MFormat=AUTO
 	# 自定义固件格式, AUTO: [自动识别]
 	
-	# 原来:Regex_Skip="packages|buildinfo|sha256sums|manifest|kernel|rootfs|factory|itb|profile|ext4|json"
 	Regex_Skip="packages|buildinfo|sha256sums|manifest|kernel|rootfs|factory|itb|profile|ext4|json"
 	# 输出固件时丢弃包含该内容的固件/文件
 	
@@ -74,6 +73,10 @@ Firmware_Diy() {
 	# ReleaseDL <release_url> <file> <target_path>
 	# Copy <cp_from> <cp_to > <rename>
 	# merge_package <git_branch> <git_repo_url> <package_path> <target_path>..
+	AddPackage other UnblockNeteaseMusic luci-app-unblockneteasemusic master
+	AddPackage passwall xiaorouji openwrt-passwall main
+	AddPackage passwall2 xiaorouji openwrt-passwall2 main
+    AddPackage passwall-depends xiaorouji openwrt-passwall-packages main
 	
 	case "${OP_AUTHOR}/${OP_REPO}:${OP_BRANCH}" in
 	coolsnowwolf/lede:master)
@@ -97,12 +100,6 @@ EOF
 		# sed -i "s?/bin/login?/usr/libexec/login.sh?g" ${FEEDS_PKG}/ttyd/files/ttyd.config
 		# sed -i 's/luci-theme-bootstrap/luci-theme-argon/g' feeds/luci/collections/luci/Makefile
 		# sed -i '/uci commit luci/i\uci set luci.main.mediaurlbase="/luci-static/argon-mod"' $(PKG_Finder d package default-settings)/files/zzz-default-settings
-
-  		AddPackage other UnblockNeteaseMusic luci-app-unblockneteasemusic master
-		AddPackage passwall xiaorouji openwrt-passwall main
-		AddPackage passwall2 xiaorouji openwrt-passwall2 main
-    	AddPackage passwall-depends xiaorouji openwrt-passwall-packages main
-
 		#sed -i "s?openwrt-23.05?master?g" ${FEEDS_CONF}
 		git reset --hard 1627fd2c745e496134834a8fb8145ba0aa458ae9
 		
@@ -151,14 +148,13 @@ EOF
 			case "${CONFIG_FILE}" in
 			x86_64)
 				# sed -i "s?/bin/login?/usr/libexec/login.sh?g" ${FEEDS_PKG}/ttyd/files/ttyd.config
-
 				# 根据https://github.com/xiaorouji/openwrt-passwall2/issues/722#issuecomment-2560962548
 				# 添加此命令解决passwall冲突
 				rm -rf ${WORK}/feeds/packages/net/{chinadns*,hysteria,geoview,trojan*,xray*,v2ray*,sing*}
     			rm -rf ${FEEDS_PKG}/net/{chinadns*,hysteria,geoview,trojan*,xray*,v2ray*,sing*}
 				rm -rf ${WORK}/feeds/luci/applications/luci-app-passwall/
 				rm -r ${FEEDS_LUCI}/luci-app-passwall
-				
+
 				# 解决rust报错https://github.com/immortalwrt/packages/issues/1607#issuecomment-2926678927
     			sed -i 's/--set=llvm\.download-ci-llvm=true/--set=llvm.download-ci-llvm=false/' ${WORK}/feeds/packages/lang/rust/Makefile
 
