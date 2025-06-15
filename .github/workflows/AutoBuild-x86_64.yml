@@ -30,6 +30,7 @@ on:
         type: choice
         options:
           - 'x86_64'
+          - 'x86_64_test'
           - 'x86_64-AP'
       Code_SOURCE: 
         description: '源码仓'
