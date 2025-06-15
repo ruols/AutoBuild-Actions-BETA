@@ -78,6 +78,7 @@ Firmware_Diy() {
 	AddPackage passwall xiaorouji openwrt-passwall main
 	AddPackage passwall2 xiaorouji openwrt-passwall2 main
 	AddPackage passwall-depends xiaorouji openwrt-passwall-packages main
+ 	AddPackage lucky sirpdboy luci-app-lucky main
 	
 	case "${OP_AUTHOR}/${OP_REPO}:${OP_BRANCH}" in
 	coolsnowwolf/lede:master)
