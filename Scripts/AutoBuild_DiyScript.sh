@@ -153,10 +153,10 @@ EOF
     
 				# 根据https://github.com/xiaorouji/openwrt-passwall2/issues/722#issuecomment-2560962548
 				# 添加此命令解决passwall冲突
-				rm -rf ${WORK}/feeds/packages/net/{chinadns*,hysteria,geoview,trojan*,xray*,v2ray*,sing*}
-    			rm -rf ${FEEDS_PKG}/net/{chinadns*,hysteria,geoview,trojan*,xray*,v2ray*,sing*}
-				rm -rf ${WORK}/feeds/luci/applications/luci-app-passwall/
-				rm -r ${FEEDS_LUCI}/luci-app-passwall
+				#rm -rf ${WORK}/feeds/packages/net/{chinadns*,hysteria,geoview,trojan*,xray*,v2ray*,sing*}
+    			rm -rf ${FEEDS_PKG}/net/{xray-core,v2ray-geodata,sing-box,chinadns-ng,dns2socks,hysteria,ipt2socks,microsocks,naiveproxy,shadowsocks-libev,shadowsocks-rust,shadowsocksr-libev,simple-obfs,tcping,trojan-plus,tuic-client,v2ray-plugin,xray-plugin,geoview,shadow-tls}
+				#rm -rf ${WORK}/feeds/luci/applications/luci-app-passwall/
+				rm -rf ${FEEDS_LUCI}/luci-app-passwall
 
 				# 解决rust报错https://github.com/immortalwrt/packages/issues/1607#issuecomment-2926678927
     			sed -i 's/--set=llvm\.download-ci-llvm=true/--set=llvm.download-ci-llvm=false/' ${WORK}/feeds/packages/lang/rust/Makefile
