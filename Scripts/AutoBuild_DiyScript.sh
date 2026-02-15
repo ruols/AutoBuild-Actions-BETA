@@ -75,9 +75,9 @@ Firmware_Diy() {
 	# merge_package <git_branch> <git_repo_url> <package_path> <target_path>..
  
 	AddPackage other UnblockNeteaseMusic luci-app-unblockneteasemusic master
-	AddPackage passwall xiaorouji openwrt-passwall main
-	AddPackage passwall2 xiaorouji openwrt-passwall2 main
-	AddPackage passwall-depends xiaorouji openwrt-passwall-packages main
+	AddPackage passwall Openwrt-Passwall openwrt-passwall main
+	AddPackage passwall2 Openwrt-Passwall openwrt-passwall2 main
+	AddPackage passwall-depends Openwrt-Passwall openwrt-passwall-packages main
  	AddPackage lucky sirpdboy luci-app-lucky main
 	
 	case "${OP_AUTHOR}/${OP_REPO}:${OP_BRANCH}" in
