@@ -176,6 +176,9 @@ EOF
 				rm -r ${WORK}/package/other/luci-app-mosdns/mosdns
 				AddPackage qosmate hudra0 qosmate main
 				AddPackage qosmate hudra0 luci-app-qosmate main
+				
+				AddPackage bandix timsaya luci-app-bandix main
+				AddPackage bandix timsaya openwrt-bandix main
 
 				AddPackage fakehttp yingziwu luci-app-fakehttp main
 				AddPackage fakehttp yingziwu openwrt-fakehttp main
