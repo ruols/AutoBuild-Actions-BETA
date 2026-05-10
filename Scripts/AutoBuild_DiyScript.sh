@@ -164,7 +164,7 @@ EOF
 				AddPackage other WROIATE luci-app-socat main
     			#rm -r ${FEEDS_LUCI}/luci-app-socat
 				AddPackage other sbwml luci-app-mosdns v5
-				mosdns_version="5.3.3"
+				mosdns_version="5.3.4"
 				wget --quiet --no-check-certificate -P /tmp \
 					https://github.com/IrineSistiana/mosdns/releases/download/v${mosdns_version}/mosdns-linux-amd64.zip
 				unzip /tmp/mosdns-linux-amd64.zip -d /tmp
