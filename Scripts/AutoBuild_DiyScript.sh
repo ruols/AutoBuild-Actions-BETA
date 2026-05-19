@@ -160,8 +160,8 @@ EOF
 
 				# 解决rust报错https://github.com/immortalwrt/packages/issues/1607#issuecomment-2926678927
     			sed -i 's/--set=llvm\.download-ci-llvm=true/--set=llvm.download-ci-llvm=false/' ${WORK}/feeds/packages/lang/rust/Makefile
-				
-				rm -r ${WORK}/package/other/luci-app-mosdns/mosdns
+
+				# rm -r ${WORK}/package/other/luci-app-mosdns/mosdns
 				AddPackage other sbwml luci-app-mosdns v5
 				AddPackage other sbwml v2ray-geodata master
 
