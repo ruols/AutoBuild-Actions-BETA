@@ -78,7 +78,8 @@ Firmware_Diy() {
 	AddPackage passwall Openwrt-Passwall openwrt-passwall main
 	AddPackage passwall2 Openwrt-Passwall openwrt-passwall2 main
 	AddPackage passwall-depends Openwrt-Passwall openwrt-passwall-packages main
- AddPackage lucky sirpdboy luci-app-lucky main
+	AddPackage lucky sirpdboy luci-app-lucky main
+	AddPackage other WROIATE luci-app-socat main
 	
 	case "${OP_AUTHOR}/${OP_REPO}:${OP_BRANCH}" in
 	coolsnowwolf/lede:master)
@@ -149,37 +150,6 @@ EOF
 			sed -i -- 's:/bin/ash:'/bin/bash':g' ${BASE_FILES}/etc/passwd
 			case "${CONFIG_FILE}" in
 			x86_64)
-				# sed -i "s?/bin/login?/usr/libexec/login.sh?g" ${FEEDS_PKG}/ttyd/files/ttyd.config
-    
-				# 根据https://github.com/xiaorouji/openwrt-passwall2/issues/722#issuecomment-2560962548
-				# 添加此命令解决passwall冲突
-				rm -rf ${WORK}/feeds/packages/net/{chinadns*,hysteria,geoview,trojan*,xray*,v2ray*,sing*}
-    rm -rf ${FEEDS_PKG}/net/{xray-core,v2ray-geodata,sing-box,chinadns-ng,dns2socks,hysteria,ipt2socks,microsocks,naiveproxy,shadowsocks-libev,shadowsocks-rust,shadowsocksr-libev,simple-obfs,tcping,trojan-plus,tuic-client,v2ray-plugin,xray-plugin,geoview,shadow-tls}
-				#rm -rf ${WORK}/feeds/luci/applications/luci-app-passwall/
-				#rm -rf ${FEEDS_LUCI}/luci-app-passwall
-
-				# 解决rust报错https://github.com/immortalwrt/packages/issues/1607#issuecomment-2926678927
-    			sed -i 's/--set=llvm\.download-ci-llvm=true/--set=llvm.download-ci-llvm=false/' ${WORK}/feeds/packages/lang/rust/Makefile
-
-				AddPackage other WROIATE luci-app-socat main
-
-				# rm -r ${WORK}/package/other/luci-app-mosdns/mosdns
-				AddPackage other sbwml luci-app-mosdns v5
-				AddPackage other sbwml v2ray-geodata master
-
-
-				# mosdns_version="5.3.4"
-				# wget --quiet --no-check-certificate -P /tmp \
-				# 	https://github.com/IrineSistiana/mosdns/releases/download/v${mosdns_version}/mosdns-linux-amd64.zip
-				# unzip /tmp/mosdns-linux-amd64.zip -d /tmp
-				# Copy /tmp/mosdns ${BASE_FILES}/usr/bin
-				# chmod +x ${BASE_FILES}/usr/bin
-				# sed -i "s?+mosdns ??g" ${WORK}/package/other/luci-app-mosdns/luci-app-mosdns/Makefile
-				# sed -i "s?+v2ray-geoip ??g" ${WORK}/package/other/luci-app-mosdns/luci-app-mosdns/Makefile
-				# sed -i "s?+v2ray-geosite ??g" ${WORK}/package/other/luci-app-mosdns/luci-app-mosdns/Makefile
-				# rm -r ${WORK}/package/other/luci-app-mosdns/mosdns
-
-
 				AddPackage qosmate hudra0 qosmate main
 				AddPackage qosmate hudra0 luci-app-qosmate main
 				
@@ -202,6 +172,19 @@ EOF
 				#cd package/dae
 				#git checkout e7040afc92a3bff4b9e4fca381e7e14a7be1b75e
 				#cd -
+				rm -rf feeds/packages/net/mosdns
+				rm -rf feeds/packages/net/v2ray-geodata
+				AddPackage other sbwml luci-app-mosdns v5
+
+				# 根据https://github.com/Openwrt-Passwall/openwrt-passwall2/issues/722#issuecomment-2560962548
+				# 添加此命令解决passwall冲突
+				rm -rf feeds/packages/net/{chinadns*,hysteria,geoview,trojan*,xray*,v2ray*,sing*}
+    rm -rf ${FEEDS_PKG}/net/{xray-core,v2ray-geodata,sing-box,chinadns-ng,dns2socks,hysteria,ipt2socks,microsocks,naiveproxy,shadowsocks-libev,shadowsocks-rust,shadowsocksr-libev,simple-obfs,tcping,trojan-plus,tuic-client,v2ray-plugin,xray-plugin,geoview,shadow-tls}
+				#rm -rf ${WORK}/feeds/luci/applications/luci-app-passwall/
+				#rm -rf ${FEEDS_LUCI}/luci-app-passwall
+
+				# 解决rust报错https://github.com/immortalwrt/packages/issues/1607#issuecomment-2926678927
+				sed -i 's/--set=llvm\.download-ci-llvm=true/--set=llvm.download-ci-llvm=false/' ${WORK}/feeds/packages/lang/rust/Makefile
 				
 				sed -i 's/^local excluded_domain = {.*/local excluded_domain = {}/' package/passwall/openwrt-passwall/luci-app-passwall/root/usr/share/passwall/rule_update.lua
 				
