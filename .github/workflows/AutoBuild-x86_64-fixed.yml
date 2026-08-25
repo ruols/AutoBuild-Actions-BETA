@@ -1,0 +1,280 @@
+###########################################################
+#   Description: Compile OpenWrt by GitHub Actions        #
+#   Based on: https://github.com/P3TERX/Actions-OpenWrt   #
+#   Author: Hyy2001X                                      #
+###########################################################
+
+name: x86_64
+on:
+  repository_dispatch:
+  ## Git Push 时触发编译(不要删除此行注释)
+  #push:
+  #  branches:
+  #    - master
+
+  ## 定时触发编译(不要删除此行注释)
+  #schedule:
+  #  - cron: 0 8 * * 5
+
+  ## 重新点亮 Star 时触发编译(不要删除此行注释)
+  watch:
+    types: [started]
+
+  ### 界面控制部分 ( 以下内容请保持不变, 如有需要仅修改 options 选项 )
+  workflow_dispatch:
+    inputs:
+      Tempoary_CONFIG:
+        description: '配置文件'
+        default: 'x86_64'
+        type: choice
+        options:
+          - 'x86_64'
+          - 'x86_64_test'
+          - 'x86_64-AP'
+      Code_SOURCE:
+        description: '源码仓'
+        default: 'immortalwrt/immortalwrt:master'
+        type: choice
+        options:
+          - 'immortalwrt/immortalwrt:master'
+          - 'immortalwrt/immortalwrt:openwrt-24.10'
+          - 'coolsnowwolf/lede:master'
+      Tempoary_FLAG:
+        description: '固件标签'
+        default: 'AUTO'
+        type: choice
+        options:
+          - 'AUTO'
+          - 'Full'
+          - 'AP'
+          - 'Test'
+      Tempoary_IP:
+        description: '固件 IP 地址 [可选]'
+        default: ''
+      UPLOAD_RELEASES:
+        description: '上传固件到 Releases'
+        default: 'true'
+        type: boolean
+      UPLOAD_ARTIFACTS:
+        description: '上传固件到 Artifacts'
+        default: 'false'
+        type: boolean
+      UPLOAD_BIN_ARTIFACTS:
+        description: '上传 bin 文件夹到 Artifacts'
+        default: 'false'
+        type: boolean
+      ### 界面控制部分结束 ( 以上内容请保持不变 )
+### 请按需求修改以下内容
+### 环境变量设置
+env:
+# 编译时调用的 [.config] 文件名称
+  CONFIG_FILE: x86_64
+# 源码仓库:分支
+  DEFAULT_SOURCE: ${{ github.event.inputs.Code_SOURCE || 'immortalwrt/immortalwrt:master' }}
+# 删除无用文件以增加编译空间
+  DELETE_USELESS_FILES: false
+# 删除早期的 workflow 任务
+  DELETE_OLD_WORKFLOW: false
+### 结束
+### 请按需求修改以上内容
+
+permissions:
+  contents: write
+
+jobs:
+  Compile:
+    runs-on: ubuntu-22.04
+
+    steps:
+
+    - name: Checkout
+      uses: actions/checkout@main
+    - name: Free Disk Space (Ubuntu)
+      if: env.DELETE_USELESS_FILES == 'true' && !cancelled()
+      uses: jlumbroso/free-disk-space@main
+      with:
+        # this might remove tools that are actually needed,
+        # if set to "true" but frees about 6 GB
+        tool-cache: true
+        # all of these default to true, but feel free to set to
+        # "false" if necessary for your workflow
+        android: true
+        dotnet: true
+        haskell: true
+        large-packages: true
+        swap-storage: true
+    - name: Initialize Environment
+      env:
+        DEBIAN_FRONTEND: noninteractive
+      run: |
+        sudo -E docker image prune -af
+        sudo -E rm -rf           /usr/share/dotnet           /usr/local/lib/android           /opt/ghc
+        sudo -E apt-mark hold grub-efi-amd64-signed
+        sudo -E apt update
+        sudo -E apt -y purge           azure-cli*           ghc*           zulu*           firefox           google*           powershell*           mongodb*           mysql*           php*           dotnet*           snap*
+        sudo -E apt -y autoremove --purge
+        sudo -E apt install -y           ack antlr3 asciidoc autoconf automake autopoint           binutils bison build-essential bzip2 ccache           cmake cpio curl device-tree-compiler flex gawk           gcc-multilib g++-multilib gettext genisoimage git           gperf haveged help2man intltool libc6-dev-i386           libelf-dev libfuse-dev libglib2.0-dev libgmp3-dev           libltdl-dev libmpc-dev libmpfr-dev libncurses5-dev           libncursesw5-dev libpython3-dev libreadline-dev           libssl-dev libtool lrzsz msmtp ninja-build p7zip           p7zip-full patch pkgconf python3           python3-pyelftools python3-setuptools qemu-utils           rsync scons squashfs-tools subversion swig texinfo           uglifyjs unzip vim wget xmlto xxd zlib1g-dev           python-is-python3 flex
+        sudo -E apt-get install -y clang llvm npm
+        sudo -E npm install -g pnpm
+        # curl -fsSL https://apt.llvm.org/llvm.sh | sudo -E bash -s -- 18
+        # sudo -E apt install -y clang-18 llvm-18 lld-18 pahole
+        # sudo update-alternatives --install /usr/bin/clang clang /usr/bin/clang-18 100
+        # sudo update-alternatives --install /usr/bin/llvm-strip llvm-strip /usr/bin/llvm-strip-18 100
+        # curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -
+        # sudo -E apt install -y nodejs
+        # sudo -E npm install -g pnpm@10
+        # sudo -E systemctl daemon-reload
+        sudo -E apt clean
+        node -v
+        pnpm -v
+        df -h
+        free -m
+        echo "CPU Cores: $(nproc)"
+    - name: Load Custom Variables
+      run: |
+        if [ -n "${{ github.event.inputs.Tempoary_CONFIG }}" ]
+        then
+            if [ -f "$GITHUB_WORKSPACE/Configs/${{ github.event.inputs.Tempoary_CONFIG }}" ]
+            then
+                CONFIG_FILE=${{ github.event.inputs.Tempoary_CONFIG }}
+            else
+                CONFIG_FILE=${{ env.CONFIG_FILE }}
+            fi
+        else
+            CONFIG_FILE=${{ env.CONFIG_FILE }}
+        fi
+        if [ ! -f "$GITHUB_WORKSPACE/Configs/$CONFIG_FILE" ]
+        then
+            echo "CONFIG_FILE: [/Config/$CONFIG_FILE] is not detected ..."
+            exit 1
+        else
+            echo "CONFIG_FILE: [/Config/$CONFIG_FILE]"
+            echo "CONFIG_FILE=$CONFIG_FILE" >> $GITHUB_ENV
+        fi
+        if [ -n "${{ github.event.inputs.Tempoary_IP }}" ]
+        then
+            echo "IP: [${{ github.event.inputs.Tempoary_IP }}]"
+            echo "Tempoary_IP=${{ github.event.inputs.Tempoary_IP }}" >> $GITHUB_ENV
+        fi
+        if [ -n "${{ github.event.inputs.Tempoary_FLAG }}" ]
+        then
+            echo "FLAG: [${{ github.event.inputs.Tempoary_FLAG }}]"
+            echo "Tempoary_FLAG=${{ github.event.inputs.Tempoary_FLAG }}" >> $GITHUB_ENV
+        fi
+        REPO_URL="https://github.com/$(cut -d \: -f 1 <<< ${{ env.DEFAULT_SOURCE }})"
+        REPO_BRANCH=$(cut -d \: -f 2 <<< ${{ env.DEFAULT_SOURCE }})
+        echo "REPO_URL=$REPO_URL" >> $GITHUB_ENV
+        echo "REPO_BRANCH=$REPO_BRANCH" >> $GITHUB_ENV
+        echo "Compile_Date=$(date +%Y%m%d%H%M)" >> $GITHUB_ENV
+        echo "Display_Date=$(date +%Y/%m/%d)" >> $GITHUB_ENV
+        if [[ -z "${{ github.event.inputs.Tempoary_CONFIG }}" ]]; then
+            echo "TIMED_TRIGGER=true" >> $GITHUB_ENV
+        else
+            echo "UPLOAD_RELEASES=${{ github.event.inputs.UPLOAD_RELEASES }}" >> $GITHUB_ENV
+            echo "UPLOAD_ARTIFACTS=${{ github.event.inputs.UPLOAD_ARTIFACTS }}" >> $GITHUB_ENV
+            echo "UPLOAD_BIN_ARTIFACTS=${{ github.event.inputs.UPLOAD_BIN_ARTIFACTS }}" >> $GITHUB_ENV
+        fi
+    - name: TIMED_TRIGGER
+      if: env.TIMED_TRIGGER == 'true'
+      env:
+        UPLOAD_RELEASES: true
+        UPLOAD_ARTIFACTS: false
+        UPLOAD_BIN_ARTIFACTS: false
+      run: |
+        echo "UPLOAD_RELEASES=${UPLOAD_RELEASES}" >> $GITHUB_ENV
+        echo "UPLOAD_ARTIFACTS=${UPLOAD_ARTIFACTS}" >> $GITHUB_ENV
+        echo "UPLOAD_BIN_ARTIFACTS=${UPLOAD_BIN_ARTIFACTS}" >> $GITHUB_ENV
+    - name: Clone Openwrt Source Code
+      run: |
+        git clone -b $REPO_BRANCH $REPO_URL openwrt
+        ln -sf /workdir/openwrt $GITHUB_WORKSPACE/openwrt
+        cd openwrt
+        ./scripts/feeds update -a
+        ./scripts/feeds install -a
+    - name: Run Diy Scripts
+      run: |
+        chmod +x Scripts/AutoBuild_*.sh
+        cd openwrt
+        if [ "${{ env.CACHE_ACCELERATE }}" == true ]
+        then
+            echo -e "
+CONFIG_DEVEL=y
+CONFIG_CCACHE=y
+" >> $GITHUB_WORKSPACE/Configs/$CONFIG_FILE
+        fi
+        cp $GITHUB_WORKSPACE/Configs/$CONFIG_FILE .config
+        source $GITHUB_WORKSPACE/Scripts/AutoBuild_DiyScript.sh
+        source $GITHUB_WORKSPACE/Scripts/AutoBuild_Function.sh
+        make defconfig
+        Firmware_Diy_Start
+        rm -f .config && cp $GITHUB_WORKSPACE/Configs/$CONFIG_FILE .config
+        Firmware_Diy_Main
+        Firmware_Diy
+        Firmware_Diy_Other
+    - name: Pre-download Libraries
+      run: |
+        cd openwrt
+        ./scripts/feeds install -a
+        make defconfig
+        make download -j$(nproc)
+
+    - name: Build OpenWrt
+      id: compile
+      run: |
+        cd openwrt
+        make -j$(nproc) || make -j1 V=s
+        [ "$?" == 0 ] && echo "Compile_Result=true" >> $GITHUB_ENV || echo "Compile_Result=false" >> $GITHUB_ENV
+    - name: Checkout Firmware
+      if: steps.compile.outcome == 'success' && !cancelled()
+      run: |
+        cd openwrt
+        source $GITHUB_WORKSPACE/Scripts/AutoBuild_Function.sh
+        Firmware_Diy_End
+
+    - name: Upload Firmware to Artifacts
+      uses: actions/upload-artifact@main
+      if: env.UPLOAD_ARTIFACTS == 'true' && steps.compile.outcome == 'success' && !cancelled()
+      with:
+        name: ${{ env.CONFIG_FILE }}_firmware_${{ env.Compile_Date }}
+        path: openwrt/bin/Firmware
+    - name: Upload bin to Artifacts
+      uses: actions/upload-artifact@main
+      if: env.UPLOAD_BIN_ARTIFACTS == 'true' && steps.compile.outcome == 'success' && !cancelled()
+      with:
+        name: ${{ env.CONFIG_FILE }}_bin_${{ env.Compile_Date }}
+        path: openwrt/bin
+    - name: Upload Firmware to Release
+      uses: svenstaro/upload-release-action@v2
+      if: env.UPLOAD_RELEASES == 'true' && steps.compile.outcome == 'success' && !cancelled()
+      with:
+        repo_token: ${{ secrets.GITHUB_TOKEN }}
+        file: openwrt/bin/Firmware/*
+        file_glob: true
+        tag: AutoUpdate
+        overwrite: true
+
+    - name: Refresh API (1/2)
+      if: env.UPLOAD_RELEASES == 'true' && steps.compile.outcome == 'success' && !cancelled()
+      env:
+        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      run: |
+        curl -L           -H "Authorization: Bearer $GH_TOKEN"           -H "Accept: application/vnd.github+json"           "https://api.github.com/repos/${{ github.repository }}/releases/tags/AutoUpdate"           -o API
+
+    - name: Refresh API (2/2)
+      if: env.UPLOAD_RELEASES == 'true' && steps.compile.outcome == 'success' && !cancelled()
+      uses: svenstaro/upload-release-action@v2
+      with:
+        repo_token: ${{ secrets.GITHUB_TOKEN }}
+        file: ./API
+        file_glob: true
+        tag: AutoUpdate
+        overwrite: true
+    - name: Delete old Workflow Runs
+      continue-on-error: true
+      if: env.DELETE_OLD_WORKFLOW == 'true' && !cancelled()
+      uses: Mattraks/delete-workflow-runs@v2
+      with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          repository: ${{ github.repository }}
+          retain_days: 3
+          keep_minimum_runs: 0
