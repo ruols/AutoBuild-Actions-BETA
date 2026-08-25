@@ -1,3 +1,4 @@
+# FIXED V2 - authenticated GitHub API request
 ###########################################################
 #   Description: Compile OpenWrt by GitHub Actions        #
 #   Based on: https://github.com/P3TERX/Actions-OpenWrt   #
@@ -70,7 +71,7 @@ env:
 # 编译时调用的 [.config] 文件名称
   CONFIG_FILE: x86_64
 # 源码仓库:分支
-  DEFAULT_SOURCE: ${{ github.event.inputs.Code_SOURCE || 'immortalwrt/immortalwrt:master' }}
+  DEFAULT_SOURCE: "${{ github.event.inputs.Code_SOURCE || 'immortalwrt/immortalwrt:master' }}"
 # 删除无用文件以增加编译空间
   DELETE_USELESS_FILES: false
 # 删除早期的 workflow 任务
@@ -197,10 +198,7 @@ jobs:
         cd openwrt
         if [ "${{ env.CACHE_ACCELERATE }}" == true ]
         then
-            echo -e "
-CONFIG_DEVEL=y
-CONFIG_CCACHE=y
-" >> $GITHUB_WORKSPACE/Configs/$CONFIG_FILE
+            echo -e "\nCONFIG_DEVEL=y\nCONFIG_CCACHE=y\n" >> $GITHUB_WORKSPACE/Configs/$CONFIG_FILE
         fi
         cp $GITHUB_WORKSPACE/Configs/$CONFIG_FILE .config
         source $GITHUB_WORKSPACE/Scripts/AutoBuild_DiyScript.sh
